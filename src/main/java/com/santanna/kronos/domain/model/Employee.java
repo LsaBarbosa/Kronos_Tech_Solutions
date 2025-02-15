@@ -1,0 +1,19 @@
+package com.santanna.kronos.domain.model;
+
+import lombok.*;
+
+import java.util.UUID;
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Employee {
+    private UUID idEmployee;
+    private String name;
+    private String surname;
+    private String email;
+    private String cpf;
+    private Double salary;
+    private String position;
+    private String password;
+}
