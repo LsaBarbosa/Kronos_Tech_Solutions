@@ -9,11 +9,9 @@ import com.santanna.kronos.application.utils.ConverterDto;
 import com.santanna.kronos.domain.common.PaginatedList;
 import com.santanna.kronos.domain.model.Employee;
 import com.santanna.kronos.domain.repository.EmployeeRepository;
-import com.santanna.kronos.infrastructure.exception.DatabaseException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import javax.naming.ServiceUnavailableException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -22,7 +20,6 @@ import java.util.stream.Collectors;
 public class EmployeeUseCase {
     public static final String EMPLOYEE_NOT_FOUND_404 = "Colaborador não encontrado";
     public static final String EMPLOYEE_ALREADY_EXIST_400 = "Colaborador/CPF já cadastrado no sistema";
-    public static final String SERVICE_UNAVALIABLE = "Serviço indisponível";
 
     private final EmployeeRepository employeeRepo;
 
@@ -30,18 +27,14 @@ public class EmployeeUseCase {
         this.employeeRepo = employeeRepo;
     }
 
-    public EmployeeResponseDto getEmployeeById(UUID id) throws ServiceUnavailableException {
-        try {
+    public EmployeeResponseDto getEmployeeById(UUID id) {
             var employee = employeeRepo.findEmployee(id)
                     .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND_404));
             return ConverterDto.toDto(employee);
-        } catch (DatabaseException ex) {
-            throw new ServiceUnavailableException(SERVICE_UNAVALIABLE);
-        }
+
     }
 
-    public PaginatedList<EmployeeResponseDto> getAllEmployees(int page, int size) throws ServiceUnavailableException {
-        try {
+    public PaginatedList<EmployeeResponseDto> getAllEmployees(int page, int size) {
             var employees = employeeRepo.findAllEmployees(page, size);
             return new PaginatedList<>(
                     employees.getContent().stream().map(ConverterDto::toDto).collect(Collectors.toList()),
@@ -49,64 +42,41 @@ public class EmployeeUseCase {
                     employees.getPageSize(),
                     employees.getTotalElements()
             );
-        } catch (DatabaseException ex) {
-            throw new ServiceUnavailableException(SERVICE_UNAVALIABLE);
-        }
     }
 
     @Transactional
-    public void addEmployee(EmployeeRequestDto addDto) throws ServiceUnavailableException {
-        try {
+    public void addEmployee(EmployeeRequestDto addDto) {
             var cpf = employeeRepo.findCpf(addDto.cpf());
             if (cpf.isPresent()) throw new BadRequestException(EMPLOYEE_ALREADY_EXIST_400);
 
             var newEmployee = creatingEmployee(addDto);
             employeeRepo.saveEmployee(newEmployee);
-
-        } catch (DatabaseException ex) {
-            throw new ServiceUnavailableException(SERVICE_UNAVALIABLE);
-        }
     }
 
     @Transactional
-    public void updateEmployee(UUID id, UpdateRequestDto updateDto) throws ServiceUnavailableException {
-        try {
+    public void updateEmployee(UUID id, UpdateRequestDto updateDto){
             var idTarget = employeeRepo.findEmployee(id)
                     .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND_404));
-
             updateEmployee(updateDto, idTarget);
-
             employeeRepo.saveEmployee(idTarget);
-
-        } catch (DatabaseException ex) {
-            throw new ServiceUnavailableException(SERVICE_UNAVALIABLE);
-        }
     }
 
     @Transactional
-    public void updtadeEmail(UUID id, UpdateRequestDto emailDto) throws ServiceUnavailableException {
-        try {
+    public void updtadeEmail(UUID id, UpdateRequestDto emailDto){
             var idTarget = employeeRepo.findEmployee(id)
                     .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND_404));
 
             Optional.ofNullable(emailDto.email()).ifPresent(idTarget::setEmail);
 
             employeeRepo.saveEmployee(idTarget);
-        } catch (DatabaseException ex) {
-            throw new ServiceUnavailableException(SERVICE_UNAVALIABLE);
-        }
     }
 
     @Transactional
-    public void deleteEmployee(UUID id) throws ServiceUnavailableException {
-        try {
+    public void deleteEmployee(UUID id){
             var idTarget = employeeRepo.findEmployee(id)
                     .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND_404));
 
             employeeRepo.deleteEmployee(idTarget.getIdEmployee());
-        } catch (DatabaseException ex) {
-            throw new ServiceUnavailableException(SERVICE_UNAVALIABLE);
-        }
     }
 
     private static void updateEmployee(UpdateRequestDto updateDto, Employee idTarget) {

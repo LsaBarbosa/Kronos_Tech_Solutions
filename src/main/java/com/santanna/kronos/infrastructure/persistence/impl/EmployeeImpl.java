@@ -80,26 +80,24 @@ public class EmployeeImpl implements EmployeeRepository {
     private Employee toDomain(EmployeeEntity entity) {
         return new Employee(
                 entity.getIdEmployee(),
+                entity.getCpf(),
                 entity.getName(),
                 entity.getSurname(),
                 entity.getEmail(),
-                entity.getCpf(),
                 entity.getSalary(),
-                entity.getPosition(),
-                entity.getPassword()
+                entity.getPosition()
         );
     }
 
     private EmployeeEntity toEntity(Employee domain) {
         return new EmployeeEntity(
                 domain.getIdEmployee(),
+                domain.getCpf(),
                 domain.getName(),
                 domain.getSurname(),
                 domain.getEmail(),
-                domain.getCpf(),
                 domain.getSalary(),
-                domain.getPosition(),
-                domain.getPassword()
+                domain.getPosition()
         );
     }
 }

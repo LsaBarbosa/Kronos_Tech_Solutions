@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.naming.ServiceUnavailableException;
 import java.util.UUID;
 
 @Tag(name = "Employee Controller", description = "Management Employee")
@@ -33,7 +32,7 @@ public class EmployeeController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<EmployeeResponseDto> getEmployeeData(@PathVariable UUID id)
-            throws ServiceUnavailableException {
+             {
         var employeeData = employeeUseCase.getEmployeeById(id);
         return ResponseEntity.ok(employeeData);
     }
@@ -47,7 +46,7 @@ public class EmployeeController {
     public ResponseEntity<PaginatedList<EmployeeResponseDto>> getAllEmployees(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
-    ) throws ServiceUnavailableException {
+    ) {
         PaginatedList<EmployeeResponseDto> employees = employeeUseCase.getAllEmployees(page, size);
         return ResponseEntity.ok(employees);
     }
@@ -63,7 +62,7 @@ public class EmployeeController {
                     """
     )
     public ResponseEntity<Void> addEmployee(@Valid @RequestBody EmployeeRequestDto addEmployeeDto)
-            throws ServiceUnavailableException {
+            {
         employeeUseCase.addEmployee(addEmployeeDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -76,7 +75,7 @@ public class EmployeeController {
     )
     public ResponseEntity<Void> updateEmployee(
             @PathVariable UUID idTarget,
-            @Valid @RequestBody UpdateRequestDto updateEmployeeDto) throws ServiceUnavailableException {
+            @Valid @RequestBody UpdateRequestDto updateEmployeeDto) {
         employeeUseCase.updateEmployee(idTarget, updateEmployeeDto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -89,7 +88,7 @@ public class EmployeeController {
     )
     public ResponseEntity<Void> updateEmail(
             @PathVariable UUID idTarget,
-            @Valid @RequestBody UpdateRequestDto updateEmailDto) throws ServiceUnavailableException {
+            @Valid @RequestBody UpdateRequestDto updateEmailDto) {
         employeeUseCase.updtadeEmail(idTarget, updateEmailDto);
         return ResponseEntity.ok().build();
     }
@@ -97,7 +96,7 @@ public class EmployeeController {
     @DeleteMapping("/{idTarget}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Administrador Deleta funcionário")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable UUID idTarget) throws ServiceUnavailableException {
+    public ResponseEntity<Void> deleteEmployee(@PathVariable UUID idTarget) {
         employeeUseCase.deleteEmployee(idTarget);
         return ResponseEntity.noContent().build();
     }

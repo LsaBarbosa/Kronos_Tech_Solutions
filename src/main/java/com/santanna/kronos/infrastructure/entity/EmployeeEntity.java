@@ -17,11 +17,10 @@ import java.util.UUID;
 public class EmployeeEntity {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID idEmployee;
+    private String cpf;
     private String name;
     private String surname;
     private String email;
-    private String cpf;
     private Double salary;
     private String position;
-    private String password;
 }
