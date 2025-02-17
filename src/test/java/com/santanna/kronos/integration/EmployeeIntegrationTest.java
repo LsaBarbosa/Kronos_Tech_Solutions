@@ -1,10 +1,11 @@
 package com.santanna.kronos.integration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.santanna.kronos.application.dto.EmployeeRequestDto;
-import com.santanna.kronos.application.dto.EmployeeResponseDto;
-import com.santanna.kronos.application.dto.UpdateRequestDto;
+import com.santanna.kronos.application.dto.employee.EmployeeRequestDto;
+import com.santanna.kronos.application.dto.employee.EmployeeResponseDto;
+import com.santanna.kronos.application.dto.employee.UpdateRequestDto;
 import com.santanna.kronos.application.exception.NotFoundException;
 import com.santanna.kronos.domain.common.PaginatedList;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,7 +34,7 @@ public class EmployeeIntegrationTest {
     public static final String DEVELOPER = "Developer";
     public static final String BASE_PATH = "/v1/employee";
     public static final String EMPLOYEE_NOT_FOUND_404 = "Colaborador não encontrado";
-
+    public static final String EMAIL_UPDATE = "/email/update/";
 
     @Autowired
     private MockMvc mockMvc;
@@ -41,113 +43,49 @@ public class EmployeeIntegrationTest {
     private EmployeeRequestDto employeeRequestDto;
     private UpdateRequestDto updateEmployeeDto;
 
-//    @BeforeEach
-//    void setUp() {
-//        UUID id = UUID.randomUUID();
-//        employee = Employee.builder()
-//                .idEmployee(id)
-//                .cpf(CPF)
-//                .name(NAME)
-//                .surname(SURNAME)
-//                .email(MAIL)
-//                .salary(SALARY)
-//                .position(DEVELOPER)
-//                .build();
-//
-//        employeeRequestDto = new EmployeeRequestDto(
-//                CPF,
-//                NAME,
-//                SURNAME,
-//                MAIL,
-//                SALARY,
-//                DEVELOPER
-//        );
-//        updateEmployeeDto = new UpdateRequestDto(
-//                CPF,
-//                NAME,
-//                SURNAME,
-//                MAIL,
-//                SALARY,
-//                DEVELOPER
-//        );
-//    }
-@BeforeEach
-void setUp() {
-    // Gerando um CPF único para cada execução de teste.
-    // Gera um número aleatório de 11 dígitos (entre 10000000000 e 99999999999)
-    long randomCpf = 10000000000L + (long)(Math.random() * 90000000000L);
-    String uniqueCpf = Long.toString(randomCpf);
+    @BeforeEach
+    void setUp() {
+        long randomCpf = 10000000000L + (long) (Math.random() * 90000000000L);
+        String uniqueCpf = Long.toString(randomCpf);
 
-    employeeRequestDto = new EmployeeRequestDto(
-            uniqueCpf,
-            NAME,
-            SURNAME,
-            MAIL,
-            SALARY,
-            DEVELOPER
-    );
-    // Para o update, alteramos o nome e o email, mantendo o CPF
-    updateEmployeeDto = new UpdateRequestDto(
-            uniqueCpf,
-            NAME + " Atualizado",
-            SURNAME,
-            "novo_" + MAIL,
-            SALARY,
-            DEVELOPER
-    );
-}
-
-    @Test
-    void testCreateAndGetEmployee() throws Exception {
-        mockMvc.perform(post(BASE_PATH)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(employeeRequestDto)))
-                .andExpect(status().isCreated());
-
-        // chamada do metodo get pois o retrono do criar emplooyee e void
-        MvcResult result = mockMvc.perform(get(BASE_PATH)
-                        .param("page", "0")
-                        .param("size", "10"))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String jsonResponse = result.getResponse().getContentAsString();
-        PaginatedList<EmployeeResponseDto> paginatedList = objectMapper.readValue(
-                jsonResponse, new TypeReference<>() {
-                });
-
-        assertThat(paginatedList.getContent()).extracting(EmployeeResponseDto::cpf)
-                .contains(employeeRequestDto.cpf());
+        employeeRequestDto = new EmployeeRequestDto(
+                uniqueCpf,
+                NAME,
+                SURNAME,
+                MAIL,
+                SALARY,
+                DEVELOPER
+        );
+        updateEmployeeDto = new UpdateRequestDto(
+                uniqueCpf,
+                NAME + " Atualizado",
+                SURNAME,
+                "novo_" + MAIL,
+                SALARY,
+                DEVELOPER
+        );
     }
 
     @Test
-    void testUpdateEmployee() throws Exception {
+    void shouldCreateAndGetEmployee() throws Exception {
+        methodPost_isCreated();
+        // chamada do metodo get pois o retrono do criar emplooyee e void
+        var result = methodGetPaginatedEmployee();
+        var paginatedList = getEmployeeResponseDtoPaginatedList(result);
+        assertThat(paginatedList.getContent()).extracting(EmployeeResponseDto::cpf)
+                .contains(employeeRequestDto.cpf());
+    }
+    @Test
+    void shouldUpdateEmployeeAndGetEmployee() throws Exception {
         // 1. Cria o funcionário via POST
-        mockMvc.perform(post(BASE_PATH)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(employeeRequestDto)))
-                .andExpect(status().isCreated());
-
+        methodPost_isCreated();
         // 2. Recupera o funcionário criado usando o GET (listagem)
-        MvcResult listResult = mockMvc.perform(get(BASE_PATH)
-                        .param("page", "0")
-                        .param("size", "10"))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String listJson = listResult.getResponse().getContentAsString();
-        PaginatedList<EmployeeResponseDto> paginatedList = objectMapper.readValue(
-                listJson, new TypeReference<>() {
-                });
+        var listResult = methodGetPaginatedEmployee();
+        var paginatedList = getEmployeeResponseDtoPaginatedList(listResult);
 
         // Filtra pelo CPF para obter o ID
-        EmployeeResponseDto createdEmployee = paginatedList.getContent()
-                .stream()
-                .filter(e -> e.cpf().equals(employeeRequestDto.cpf()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Employee not found in list"));
-
-        UUID employeeId = createdEmployee.id();
+        var createdEmployee = filterByCpfToGetId(paginatedList);
+        var employeeId = createdEmployee.id();
 
         // 3. Atualiza o funcionário com o updateEmployeeDto
         mockMvc.perform(put(BASE_PATH + "/" + employeeId)
@@ -156,9 +94,7 @@ void setUp() {
                 .andExpect(status().isOk());
 
         // 4. Realiza um GET para confirmar as atualizações
-        MvcResult getResult = mockMvc.perform(get(BASE_PATH + "/" + employeeId))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult getResult = methodGetId(employeeId);
 
         String getJson = getResult.getResponse().getContentAsString();
         EmployeeResponseDto responseDto = objectMapper.readValue(getJson, EmployeeResponseDto.class);
@@ -167,46 +103,28 @@ void setUp() {
         assertThat(responseDto.name()).isEqualTo(updateEmployeeDto.name());
         assertThat(responseDto.email()).isEqualTo(updateEmployeeDto.email());
     }
-
     @Test
-    void testUpdateEmailEmployee() throws Exception {
+    void shouldUpdateEmailEmployeeAndGetEmployee() throws Exception {
         // 1. Cria o funcionário via POST
-        mockMvc.perform(post(BASE_PATH)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(employeeRequestDto)))
-                .andExpect(status().isCreated());
+        methodPost_isCreated();
 
         // 2. Recupera o funcionário criado usando o GET (listagem)
-        MvcResult listResult = mockMvc.perform(get(BASE_PATH)
-                        .param("page", "0")
-                        .param("size", "10"))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult listResult = methodGetPaginatedEmployee();
 
-        String listJson = listResult.getResponse().getContentAsString();
-        PaginatedList<EmployeeResponseDto> paginatedList = objectMapper.readValue(
-                listJson, new TypeReference<>() {
-                });
-
+        PaginatedList<EmployeeResponseDto> paginatedList = getEmployeeResponseDtoPaginatedList(listResult);
         // Filtra pelo CPF para obter o ID
-        EmployeeResponseDto createdEmployee = paginatedList.getContent()
-                .stream()
-                .filter(e -> e.cpf().equals(employeeRequestDto.cpf()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Employee not found in list"));
+        var createdEmployee = filterByCpfToGetId(paginatedList);
 
         UUID employeeId = createdEmployee.id();
 
         // 3. Atualiza o funcionário com o updateEmployeeDto
-        mockMvc.perform(put(BASE_PATH + "/email/update/" + employeeId)
+        mockMvc.perform(put(BASE_PATH + EMAIL_UPDATE + employeeId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateEmployeeDto)))
                 .andExpect(status().isOk());
 
         // 4. Realiza um GET para confirmar as atualizações
-        MvcResult getResult = mockMvc.perform(get(BASE_PATH + "/" + employeeId))
-                .andExpect(status().isOk())
-                .andReturn();
+        var getResult = methodGetId(employeeId);
 
         String getJson = getResult.getResponse().getContentAsString();
         EmployeeResponseDto responseDto = objectMapper.readValue(getJson, EmployeeResponseDto.class);
@@ -214,24 +132,14 @@ void setUp() {
         // Verifica se os dados foram atualizados conforme o DTO de update
         assertThat(responseDto.email()).isEqualTo(updateEmployeeDto.email());
     }
-
     @Test
-    void testDeleteEmployee() throws Exception {
-        mockMvc.perform(post(BASE_PATH)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(employeeRequestDto)))
-                .andExpect(status().isCreated());
+    void shouldDeleteEmployee() throws Exception {
+        methodPost_isCreated();
 
         // 2. Recupera o funcionário criado via GET (listagem) para obter o ID
-        MvcResult listResult = mockMvc.perform(get(BASE_PATH)
-                        .param("page", "0")
-                        .param("size", "10"))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult listResult = methodGetPaginatedEmployee();
 
-        String listJson = listResult.getResponse().getContentAsString();
-        PaginatedList<EmployeeResponseDto> paginatedList = objectMapper.readValue(
-                listJson, new TypeReference<>() {});
+        PaginatedList<EmployeeResponseDto> paginatedList = getEmployeeResponseDtoPaginatedList(listResult);
 
         // Filtra pelo CPF para obter o ID do funcionário criado
         EmployeeResponseDto createdEmployee = paginatedList.getContent()
@@ -250,4 +158,40 @@ void setUp() {
         mockMvc.perform(get(BASE_PATH + "/" + employeeId))
                 .andExpect(status().isNotFound());
     }
+
+    private void methodPost_isCreated() throws Exception {
+
+        mockMvc.perform(post(BASE_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(employeeRequestDto)))
+                .andExpect(status().isCreated());
+    }
+    private MvcResult methodGetId(UUID employeeId) throws Exception {
+        return mockMvc.perform(get(BASE_PATH + "/" + employeeId))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+    private MvcResult methodGetPaginatedEmployee() throws Exception {
+        return mockMvc.perform(get(BASE_PATH)
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+    private EmployeeResponseDto filterByCpfToGetId(PaginatedList<EmployeeResponseDto> paginatedList) {
+        return paginatedList.getContent()
+                .stream()
+                .filter(e -> e.cpf().equals(employeeRequestDto.cpf()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Employee not found in list"));
+    }
+    private PaginatedList<EmployeeResponseDto> getEmployeeResponseDtoPaginatedList(MvcResult result)
+            throws UnsupportedEncodingException, JsonProcessingException {
+
+        String jsonResponse = result.getResponse().getContentAsString();
+        return objectMapper.readValue(
+                jsonResponse, new TypeReference<>() {
+                });
+    }
+
 }

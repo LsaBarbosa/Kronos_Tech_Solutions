@@ -1,8 +1,8 @@
 package com.santanna.kronos.application.usecase;
 
-import com.santanna.kronos.application.dto.EmployeeRequestDto;
-import com.santanna.kronos.application.dto.EmployeeResponseDto;
-import com.santanna.kronos.application.dto.UpdateRequestDto;
+import com.santanna.kronos.application.dto.employee.EmployeeRequestDto;
+import com.santanna.kronos.application.dto.employee.EmployeeResponseDto;
+import com.santanna.kronos.application.dto.employee.UpdateRequestDto;
 import com.santanna.kronos.application.exception.BadRequestException;
 import com.santanna.kronos.application.exception.NotFoundException;
 import com.santanna.kronos.domain.common.PaginatedList;

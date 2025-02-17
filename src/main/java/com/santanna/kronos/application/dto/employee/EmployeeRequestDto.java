@@ -1,4 +1,4 @@
-package com.santanna.kronos.application.dto;
+package com.santanna.kronos.application.dto.employee;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;

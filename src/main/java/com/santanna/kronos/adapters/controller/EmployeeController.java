@@ -1,8 +1,8 @@
 package com.santanna.kronos.adapters.controller;
 
-import com.santanna.kronos.application.dto.EmployeeRequestDto;
-import com.santanna.kronos.application.dto.EmployeeResponseDto;
-import com.santanna.kronos.application.dto.UpdateRequestDto;
+import com.santanna.kronos.application.dto.employee.EmployeeRequestDto;
+import com.santanna.kronos.application.dto.employee.EmployeeResponseDto;
+import com.santanna.kronos.application.dto.employee.UpdateRequestDto;
 import com.santanna.kronos.application.usecase.EmployeeUseCase;
 import com.santanna.kronos.domain.common.PaginatedList;
 import io.swagger.v3.oas.annotations.Operation;
