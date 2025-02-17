@@ -53,7 +53,7 @@ public class EmployeeImpl implements EmployeeRepository {
                     entityPage.getTotalElements()
             );
         } catch (DataAccessException ex) {
-            throw new DatabaseException("Error employee ID not found", ex);
+            throw new DatabaseException("Error! Employees not found", ex);
         }
     }
 

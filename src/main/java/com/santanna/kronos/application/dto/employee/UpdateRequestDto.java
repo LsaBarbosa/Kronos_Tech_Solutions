@@ -1,13 +1,9 @@
-package com.santanna.kronos.application.dto;
+package com.santanna.kronos.application.dto.employee;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.util.UUID;
-
-public record EmployeeResponseDto(
-        @Schema(description = "Identificador único do banco")
-        UUID id,
-        @Schema(description = "Identificador único do colaborador", example = "12345678901")
+public record UpdateRequestDto(
+        @Schema(description = "Identificador único", example = "12345678901")
         String cpf,
         @Schema(description = "Primeiro nome do colaborador", example = "João")
         String name,
@@ -20,4 +16,5 @@ public record EmployeeResponseDto(
         @Schema(description = "Cargo do colaborador", example = "Engenheiro")
         String position
 ) {
+
 }
