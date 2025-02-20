@@ -3,6 +3,8 @@ package com.santanna.kronos.application.dto.employee;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
+import java.util.UUID;
+
 public record EmployeeRequestDto(
         @Schema(description = "Identificador único", example = "12345678901")
         @NotBlank(message = "CPF " + NOT_BLANK)
@@ -32,7 +34,12 @@ public record EmployeeRequestDto(
 
         @Schema(description = "Cargo do colaborador", example = "Engenheiro")
         @NotBlank(message = "Position " + NOT_BLANK)
-        String position
+        String position,
+
+        @Schema(description = "Identificador único da empresa", example = "1234567890112")
+        @NotBlank(message = "CNPJ " + NOT_BLANK)
+        @Size(min = 13, max = 13, message = CHARACTER_SIZE)
+        String cnpj
 ) {
     public static final String NOT_BLANK = "Deve ser preenchido";
     public static final String CHARACTER_SIZE = "Deve conter exatamente 11 caractetes";
