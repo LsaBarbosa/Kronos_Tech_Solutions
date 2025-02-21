@@ -25,7 +25,7 @@ public class CompanyImpl implements CompanyRepository {
     @Override
     public Optional<Company> findCompany(UUID companyId) {
         try {
-            return companyPersistence.findById(companyId).map(ConverterDomainEntity::toDomain);
+            return companyPersistence.findByIdWithEmployees(companyId).map(ConverterDomainEntity::toDomain);
         } catch (DataAccessException ex) {
             throw new DatabaseException("Error company ID not found: " + companyId, ex);
         }
