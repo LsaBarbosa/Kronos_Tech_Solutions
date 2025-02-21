@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DatabaseException.class)
     public ResponseEntity<String> handleDatabaseException(DatabaseException ex) {
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Erro ao acessar o banco de dados.");
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Erro ao acessar o banco de dados." + ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
