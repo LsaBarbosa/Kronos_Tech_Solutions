@@ -3,8 +3,8 @@ package com.santanna.kronos.infrastructure.persistence.impl;
 import com.santanna.kronos.domain.common.PaginatedList;
 import com.santanna.kronos.domain.model.Company;
 import com.santanna.kronos.domain.repository.CompanyRepository;
-import com.santanna.kronos.infrastructure.entity.CompanyEntity;
 import com.santanna.kronos.infrastructure.exception.DatabaseException;
+import com.santanna.kronos.infrastructure.mapper.ConverterDomainEntity;
 import com.santanna.kronos.infrastructure.persistence.CompanyPersistence;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +25,7 @@ public class CompanyImpl implements CompanyRepository {
     @Override
     public Optional<Company> findCompany(UUID companyId) {
         try {
-            return companyPersistence.findById(companyId).map(this::toDomain);
+            return companyPersistence.findByIdWithEmployees(companyId).map(ConverterDomainEntity::toDomain);
         } catch (DataAccessException ex) {
             throw new DatabaseException("Error company ID not found: " + companyId, ex);
         }
@@ -34,7 +34,7 @@ public class CompanyImpl implements CompanyRepository {
     @Override
     public Optional<Company> findCnpj(String cnpj) {
         try {
-            return companyPersistence.findCompanyByCnpj(cnpj).map(this::toDomain);
+            return companyPersistence.findCompanyByCnpj(cnpj).map(ConverterDomainEntity::toDomain);
         } catch (DataAccessException ex) {
             throw new DatabaseException("Error company CNPJ not found: " + cnpj, ex);
         }
@@ -45,7 +45,7 @@ public class CompanyImpl implements CompanyRepository {
         try {
             var entityPage = companyPersistence.findAll(PageRequest.of(page, size));
             return new PaginatedList<>(
-                    entityPage.getContent().stream().map(this::toDomain)
+                    entityPage.getContent().stream().map(ConverterDomainEntity::toDomain)
                             .collect(Collectors.toList()),
                     entityPage.getNumber(),
                     entityPage.getSize(),
@@ -59,9 +59,9 @@ public class CompanyImpl implements CompanyRepository {
     @Override
     public void saveCompany(Company company) {
         try {
-            var companyEntity = this.toEntity(company);
+            var companyEntity = ConverterDomainEntity.toEntity(company);
             var savedEntity = this.companyPersistence.save(companyEntity);
-            toDomain(savedEntity);
+            ConverterDomainEntity.toDomain(savedEntity);
         } catch (DataAccessException ex) {
             throw new DatabaseException("Error saving employee", ex);
         }
@@ -74,21 +74,5 @@ public class CompanyImpl implements CompanyRepository {
         } catch (DataAccessException ex) {
             throw new DatabaseException("Error deleting employee", ex);
         }
-    }
-
-    private Company toDomain(CompanyEntity entity) {
-        return new Company(
-                entity.getId(),
-                entity.getNameCompany(),
-                entity.getCnpj()
-        );
-    }
-
-    private CompanyEntity toEntity(Company domain) {
-        return new CompanyEntity(
-                domain.getId(),
-                domain.getNameCompany(),
-                domain.getCnpj()
-        );
     }
 }

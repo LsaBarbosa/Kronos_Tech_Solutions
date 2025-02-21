@@ -18,6 +18,9 @@ public record EmployeeResponseDto(
         @Schema(description = "Sálario do colaborador", example = "1200")
         Double salary,
         @Schema(description = "Cargo do colaborador", example = "Engenheiro")
-        String position
+        String position,
+        @Schema(description = "Primeiro nome do colaborador", example = "Minha Empresa ")
+        String nameCompany
+
 ) {
 }

@@ -23,4 +23,7 @@ public class EmployeeEntity {
     private String email;
     private Double salary;
     private String position;
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false) // Define a chave estrangeira
+    private CompanyEntity company;
 }

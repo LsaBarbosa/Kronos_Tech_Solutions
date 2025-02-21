@@ -8,6 +8,7 @@ import com.santanna.kronos.domain.model.Employee;
 public class ConverterDto {
 
     public static EmployeeResponseDto toDto(Employee employee) {
+        String companyName = employee.getCompany() != null ? employee.getCompany().getNameCompany() : null;
         return new EmployeeResponseDto(
                 employee.getIdEmployee(),
                 employee.getCpf(),
@@ -15,14 +16,19 @@ public class ConverterDto {
                 employee.getSurname(),
                 employee.getEmail(),
                 employee.getSalary(),
-                employee.getPosition()
+                employee.getPosition(),
+                companyName
         );
     }
+
     public static CompanyResponseDto toDto(Company company) {
+        var count = company.getEmployees() != null ? company.getEmployees().size() : 0;
+
         return new CompanyResponseDto(
                 company.getId(),
                 company.getCnpj(),
-                company.getNameCompany()
+                company.getNameCompany(),
+                count
         );
     }
 }

@@ -3,8 +3,8 @@ package com.santanna.kronos.infrastructure.persistence.impl;
 import com.santanna.kronos.domain.common.PaginatedList;
 import com.santanna.kronos.domain.model.Employee;
 import com.santanna.kronos.domain.repository.EmployeeRepository;
-import com.santanna.kronos.infrastructure.entity.EmployeeEntity;
 import com.santanna.kronos.infrastructure.exception.DatabaseException;
+import com.santanna.kronos.infrastructure.mapper.ConverterDomainEntity;
 import com.santanna.kronos.infrastructure.persistence.EmployeePersistence;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.PageRequest;
@@ -21,12 +21,13 @@ public class EmployeeImpl implements EmployeeRepository {
 
     public EmployeeImpl(EmployeePersistence employeePersistence) {
         this.employeePersistence = employeePersistence;
+
     }
 
     @Override
     public Optional<Employee> findEmployee(UUID employeeId) {
         try {
-            return employeePersistence.findById(employeeId).map(this::toDomain);
+            return employeePersistence.findById(employeeId).map(ConverterDomainEntity::toDomain);
         } catch (DataAccessException ex) {
             throw new DatabaseException("Error employee ID not found: " + employeeId, ex);
         }
@@ -34,11 +35,11 @@ public class EmployeeImpl implements EmployeeRepository {
 
     @Override
     public Optional<Employee> findCpf(String cpf) {
-      try {
-          return employeePersistence.findEmployeeByCpf(cpf).map(this::toDomain);
-      }catch (DatabaseException ex){
-          throw new DatabaseException("Error CPF not found: " + cpf, ex);
-      }
+        try {
+            return employeePersistence.findEmployeeByCpf(cpf).map(ConverterDomainEntity::toDomain);
+        } catch (DatabaseException ex) {
+            throw new DatabaseException("Error CPF not found: " + cpf, ex);
+        }
     }
 
     @Override
@@ -46,7 +47,7 @@ public class EmployeeImpl implements EmployeeRepository {
         try {
             var entityPage = employeePersistence.findAll(PageRequest.of(page, size));
             return new PaginatedList<>(
-                    entityPage.getContent().stream().map(this::toDomain)
+                    entityPage.getContent().stream().map(ConverterDomainEntity::toDomain)
                             .collect(Collectors.toList()),
                     entityPage.getNumber(),
                     entityPage.getSize(),
@@ -60,9 +61,9 @@ public class EmployeeImpl implements EmployeeRepository {
     @Override
     public Employee saveEmployee(Employee employee) {
         try {
-            var employeeEntity = this.toEntity(employee);
+            var employeeEntity = ConverterDomainEntity.toEntity(employee);
             var savedEntity = this.employeePersistence.save(employeeEntity);
-            return toDomain(savedEntity);
+            return ConverterDomainEntity.toDomain(savedEntity);
         } catch (DataAccessException ex) {
             throw new DatabaseException("Error saving employee", ex);
         }
@@ -77,27 +78,4 @@ public class EmployeeImpl implements EmployeeRepository {
         }
     }
 
-    private Employee toDomain(EmployeeEntity entity) {
-        return new Employee(
-                entity.getIdEmployee(),
-                entity.getCpf(),
-                entity.getName(),
-                entity.getSurname(),
-                entity.getEmail(),
-                entity.getSalary(),
-                entity.getPosition()
-        );
-    }
-
-    private EmployeeEntity toEntity(Employee domain) {
-        return new EmployeeEntity(
-                domain.getIdEmployee(),
-                domain.getCpf(),
-                domain.getName(),
-                domain.getSurname(),
-                domain.getEmail(),
-                domain.getSalary(),
-                domain.getPosition()
-        );
-    }
 }

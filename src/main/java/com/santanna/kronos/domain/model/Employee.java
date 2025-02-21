@@ -16,4 +16,5 @@ public class Employee {
     private String email;
     private Double salary;
     private String position;
+    private Company company;
 }

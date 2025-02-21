@@ -10,6 +10,8 @@ public record CompanyResponseDto(
         @Schema(description = "Identificador único da Empresa", example = "12345678901234")
         String cnpj,
         @Schema(description = "Primeiro nome do colaborador", example = "Minha Empresa ")
-        String nameCompany
+        String nameCompany,
+        @Schema(description = "Quantidade de funcionários na empresa", example = "10")
+        Integer employeeCount
 ) {
 }

@@ -17,16 +17,6 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-//    @ExceptionHandler(BusinessException.class)
-//    public ResponseEntity<String> handleBusinessException(BusinessException ex) {
-//        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ex.getMessage());
-//    }
-//
-//    @ExceptionHandler(DomainException.class)
-//    public ResponseEntity<String> handleDomainException(DomainException ex) {
-//        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
-//    }
-
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<String> handleNotFoundException(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
@@ -34,7 +24,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DatabaseException.class)
     public ResponseEntity<String> handleDatabaseException(DatabaseException ex) {
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Erro ao acessar o banco de dados.");
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Erro ao acessar o banco de dados." + ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
