@@ -38,7 +38,7 @@ public class CompanyImpl implements CompanyRepository {
     @Override
     public Optional<Company> findCnpj(String cnpj) {
         try {
-            return companyPersistence.findCompanyByCnpj(cnpj).map(ConverterDomainEntity::toDomain);
+            return companyPersistence.findByCnpj(cnpj).map(ConverterDomainEntity::toDomain);
         } catch (DataAccessException ex) {
             throw new DatabaseException(COMPANY_CNPJ_NOT_FOUND + cnpj, ex);
         }
