@@ -29,19 +29,17 @@ public class CompanyController {
             description = "Acesso as informações de uma empresa."
     )
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<CompanyResponseDto> getCompanyById(@PathVariable UUID id) {
         var companyData = companyUseCase.findCompanyById(id);
         return ResponseEntity.ok(companyData);
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     @Operation(
             summary = "Administrador busca todos as empresas",
             description = "Retorna uma lista com dadps de todas as empresas."
     )
-    public ResponseEntity<PaginatedList<CompanyResponseDto>> getAllEmployees(
+    public ResponseEntity<PaginatedList<CompanyResponseDto>> getAllCompanies(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
@@ -50,7 +48,6 @@ public class CompanyController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     @Operation(
             summary = "Administrador registra uma nova empresa",
             description = " Cadastra uma empresa."
@@ -61,7 +58,6 @@ public class CompanyController {
     }
 
     @PutMapping("/{idTarget}")
-    @ResponseStatus(HttpStatus.OK)
     @Operation(
             summary = "Administrador atualiza dados da empresa",
             description = "Atualiza dados de uma empresa."
@@ -74,9 +70,8 @@ public class CompanyController {
     }
 
     @DeleteMapping("/{idTarget}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Administrador Deleta uma Empresa")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable UUID idTarget) {
+    public ResponseEntity<Void> deleteCompany(@PathVariable UUID idTarget) {
         companyUseCase.deleteCompany(idTarget);
         return ResponseEntity.noContent().build();
     }

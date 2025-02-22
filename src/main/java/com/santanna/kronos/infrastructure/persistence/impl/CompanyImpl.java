@@ -16,6 +16,10 @@ import java.util.stream.Collectors;
 
 @Component
 public class CompanyImpl implements CompanyRepository {
+    public static final String COMPANY_ID_NOT_FOUND = "Error company ID not found: ";
+    public static final String COMPANY_CNPJ_NOT_FOUND = "Error company CNPJ not found: ";
+    public static final String ERROR_SAVING_COMPANY = "Error saving Company";
+    public static final String ERROR_DELETING_EMPLOYEE = "Error deleting employee";
     private final CompanyPersistence companyPersistence;
 
     public CompanyImpl(CompanyPersistence companyPersistence) {
@@ -27,7 +31,7 @@ public class CompanyImpl implements CompanyRepository {
         try {
             return companyPersistence.findByIdWithEmployees(companyId).map(ConverterDomainEntity::toDomain);
         } catch (DataAccessException ex) {
-            throw new DatabaseException("Error company ID not found: " + companyId, ex);
+            throw new DatabaseException(COMPANY_ID_NOT_FOUND + companyId, ex);
         }
     }
 
@@ -36,7 +40,7 @@ public class CompanyImpl implements CompanyRepository {
         try {
             return companyPersistence.findCompanyByCnpj(cnpj).map(ConverterDomainEntity::toDomain);
         } catch (DataAccessException ex) {
-            throw new DatabaseException("Error company CNPJ not found: " + cnpj, ex);
+            throw new DatabaseException(COMPANY_CNPJ_NOT_FOUND + cnpj, ex);
         }
     }
 
@@ -52,7 +56,7 @@ public class CompanyImpl implements CompanyRepository {
                     entityPage.getTotalElements()
             );
         } catch (DataAccessException ex) {
-            throw new DatabaseException("Error! Companies not found", ex);
+            throw new DatabaseException(COMPANY_CNPJ_NOT_FOUND, ex);
         }
     }
 
@@ -63,7 +67,7 @@ public class CompanyImpl implements CompanyRepository {
             var savedEntity = this.companyPersistence.save(companyEntity);
             ConverterDomainEntity.toDomain(savedEntity);
         } catch (DataAccessException ex) {
-            throw new DatabaseException("Error saving employee", ex);
+            throw new DatabaseException(ERROR_SAVING_COMPANY, ex);
         }
     }
 
@@ -72,7 +76,7 @@ public class CompanyImpl implements CompanyRepository {
         try {
             companyPersistence.deleteById(companyId);
         } catch (DataAccessException ex) {
-            throw new DatabaseException("Error deleting employee", ex);
+            throw new DatabaseException(ERROR_DELETING_EMPLOYEE, ex);
         }
     }
 }

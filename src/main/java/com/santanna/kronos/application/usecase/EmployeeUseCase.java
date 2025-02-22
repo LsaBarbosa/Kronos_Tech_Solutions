@@ -69,6 +69,10 @@ public class EmployeeUseCase {
     public void updateEmployee(UUID id, UpdateRequestDto updateDto) {
         var idTarget = employeeRepo.findEmployee(id)
                 .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND_404));
+        if (updateDto.cpf() != null && !updateDto.cpf().equals(idTarget.getCpf())) {
+            var existingEmployee = employeeRepo.findCpf(updateDto.cpf());
+            if (existingEmployee.isPresent()) throw new BadRequestException(EMPLOYEE_ALREADY_EXIST_400);
+        }
         updateEmployee(updateDto, idTarget);
         employeeRepo.saveEmployee(idTarget);
     }
