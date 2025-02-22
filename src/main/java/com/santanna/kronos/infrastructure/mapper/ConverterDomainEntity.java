@@ -6,17 +6,18 @@ import com.santanna.kronos.infrastructure.entity.CompanyEntity;
 import com.santanna.kronos.infrastructure.entity.EmployeeEntity;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ConverterDomainEntity {
     // Conversão de CompanyEntity para Company (domínio)
     public static Company toDomain(CompanyEntity entity) {
-        List<Employee> employees = null;
-        if (entity.getEmployees() != null) {
-            employees = entity.getEmployees().stream()
-                    .map(ConverterDomainEntity::toDomain)
-                    .collect(Collectors.toList());
-        }
+        List<Employee> employees = Optional.ofNullable(entity.getEmployees())
+                .orElse(List.of()) // Retorna lista vazia se null
+                .stream()
+                .map(ConverterDomainEntity::toDomain)
+                .collect(Collectors.toList());
+
         return Company.builder()
                 .id(entity.getId())
                 .nameCompany(entity.getNameCompany())

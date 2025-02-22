@@ -36,7 +36,7 @@ public class EmployeeImpl implements EmployeeRepository {
     @Override
     public Optional<Employee> findCpf(String cpf) {
         try {
-            return employeePersistence.findEmployeeByCpf(cpf).map(ConverterDomainEntity::toDomain);
+            return employeePersistence.findByCpf(cpf).map(ConverterDomainEntity::toDomain);
         } catch (DatabaseException ex) {
             throw new DatabaseException("Error CPF not found: " + cpf, ex);
         }
